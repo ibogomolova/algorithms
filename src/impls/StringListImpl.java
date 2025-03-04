@@ -1,6 +1,7 @@
-package interfaces;
+package impls;
 
 import exception.ArrayIndexException;
+import interfaces.StringList;
 
 import java.util.Arrays;
 

@@ -16,14 +16,14 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public Integer add(Integer item) {
-        checkLength();
+        checkResize();
         array[size++] = item;
         return item;
     }
 
     @Override
     public Integer add(int index, Integer item) {
-        checkLength();
+        checkResize();
         checkIndex(index);
         System.arraycopy(array, index, array, index + 1,size - index);
         array[index] = item;
@@ -33,7 +33,7 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public Integer set(int index, Integer item) {
-        checkLength();
+        checkResize();
         checkIndex(index);
         array[index] = item;
         return item;
@@ -61,12 +61,8 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public int indexOf(Integer item) {
-        for (int i = 0; i < size; i++) {
-            if (array[i].equals(item)) {
-                return i;
-            }
-        }
-        return -1;
+        sort();
+        return binarySearch(item);
     }
 
     @Override
@@ -113,9 +109,75 @@ public class IntegerListImpl implements IntegerList {
         return Arrays.copyOf(array, size);
     }
 
-    private void checkLength() {
+    private int binarySearch(Integer item) {
+        int left = 0;
+        int right = size - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (array[mid].equals(item)) {
+                return mid;
+            } else if (array[mid] < item) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+
+    private void sort() {
+        mergeSort(array);
+    }
+
+    public static void mergeSort(Integer[] table) {
+        if (table.length < 2) {
+            return;
+        }
+        int mid = table.length / 2;
+        Integer[] left = new Integer[mid];
+        Integer[] right = new Integer[table.length - mid];
+
+        for (int i = 0; i < left.length; i++) {
+            left[i] = table[i];
+        }
+        for (int i = 0; i < right.length; i++) {
+            right[i] = table[mid + i];
+        }
+        mergeSort(left);
+        mergeSort(right);
+        merge(table, left, right);
+    }
+    public static void merge(Integer[] table, Integer[] left, Integer[] right) {
+        int i = 0, j = 0, k = 0;
+
+        while (i < left.length && j < right.length) {
+            if (left[i] <= right[j]) {
+                table[k++] = left[i++];
+            } else {
+                table[k++] = right[j++];
+            }
+        }
+
+        while (i < left.length) {
+            table[k++] = left[i++];
+        }
+
+        while (j < right.length) {
+            table[k++] = right[j++];
+        }
+    }
+
+    private void grow() {
+        array = Arrays.copyOf(array, (int) (array.length * 1.5));
+    }
+
+    public String toString() {
+        return Arrays.toString(this.toArray());
+    }
+
+    private void checkResize() {
         if (size >= array.length) {
-            throw new ArrayIndexException("Не осталось свободных индексов для добавления элемента ");
+            grow();
         }
     }
 
